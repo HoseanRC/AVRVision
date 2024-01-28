@@ -26,6 +26,7 @@ static struct argp_option options[] = {
     {"raw", 'r', 0, 0, "use raw output"},
     {"target", 't', "target", 0, "microcontroller target (use \"list\" for all possible targets)"},
     {"frequency", 'f', "frequency", 0, "frequency of the microcontroller in Hz"},
+    {"skip-config", 's', 0, 0, "skip config file"},
     {0}};
 
 struct arguments
@@ -33,6 +34,7 @@ struct arguments
     char *dir;
     char *target;
     long frequency;
+    bool skip_config;
     bool raw;
 };
 
@@ -50,6 +52,9 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
     case 't':
         arguments->target = arg;
         break;
+    case 's':
+        arguments->skip_config = true;
+        break;
     case 'f':
         char *end;
         arguments->frequency = strtol(arg, &end, 10);
@@ -61,18 +66,26 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         break;
     case ARGP_KEY_END:
         bool config_exists = false;
-        if (arguments->dir != NULL)
+        if (!arguments->skip_config)
         {
-            char *config_path;
-            config_path = malloc(strlen(arguments->dir) + sizeof("/" PROJECT_DIR "/" CONFIG_FILE));
-            strcpy(config_path, arguments->dir);
-            strcat(config_path, "/" PROJECT_DIR "/" CONFIG_FILE);
-            config_exists = access(config_path, F_OK) == 0;
+            if (arguments->dir != NULL)
+            {
+                char *config_path;
+                config_path = malloc(strlen(arguments->dir) + sizeof("/" PROJECT_DIR "/" CONFIG_FILE));
+                strcpy(config_path, arguments->dir);
+                strcat(config_path, "/" PROJECT_DIR "/" CONFIG_FILE);
+                config_exists = access(config_path, F_OK) == 0;
+            }
+            else if (access("./" PROJECT_DIR "/" CONFIG_FILE, F_OK) == 0)
+                config_exists = true;
         }
-        else if (access("./" PROJECT_DIR "/" CONFIG_FILE, F_OK) == 0)
-            config_exists = true;
+        chdir(arguments->dir);
+        if(config_exists){
+            char *pwd = getcwd(NULL, 0);
+            printf("config file found.\nusing config file at: %s" PATH_SLASH PROJECT_DIR PATH_SLASH CONFIG_FILE "\n", pwd);
+            free(pwd);
+        }
         if (!config_exists && (arguments->frequency == NULL || arguments->target == NULL)) // TODO: fix frequency for chips that dont have frequency setting
-                                                                                           // TODO: if config file exists, ignore target and frequency, and also inform the user
         {
             argp_failure(state, 1, 0, "required frequency and target." CHECK_HELP);
             exit(ARGP_ERR_UNKNOWN);
