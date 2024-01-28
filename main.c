@@ -14,6 +14,8 @@
 
 #include "filenames.h"
 
+#define CHECK_HELP "\nTry `a.out --help' or `a.out --usage' for more information."
+
 int logging = true;
 const char *argp_program_version = "0.0.1";
 const char *argp_program_bug_address = "hoseanrc@outlook.com";
@@ -30,7 +32,7 @@ struct arguments
 {
     char *dir;
     char *target;
-    long *frequency;
+    long frequency;
     bool raw;
 };
 
@@ -49,7 +51,13 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         arguments->target = arg;
         break;
     case 'f':
-        arguments->frequency = atol(arg);
+        char *end;
+        arguments->frequency = strtol(arg, &end, 10);
+        if (*end)
+        {
+            argp_failure(state, 1, 0, "frequency have to be a number." CHECK_HELP);
+            exit(ARGP_ERR_UNKNOWN);
+        }
         break;
     case ARGP_KEY_END:
         bool config_exists = false;
@@ -66,7 +74,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         if (!config_exists && (arguments->frequency == NULL || arguments->target == NULL)) // TODO: fix frequency for chips that dont have frequency setting
                                                                                            // TODO: if config file exists, ignore target and frequency, and also inform the user
         {
-            argp_failure(state, 1, 0, "required frequency and target. See --help for more information");
+            argp_failure(state, 1, 0, "required frequency and target." CHECK_HELP);
             exit(ARGP_ERR_UNKNOWN);
         }
     case ARGP_KEY_ARG:
