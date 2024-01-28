@@ -7,6 +7,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
 
 file(GLOB_RECURSE sources "src/*.c" "src/*.h")
 
-add_executable(executable ${sources})
-target_compile_options(executable PUBLIC -std=gnu17)
-target_include_directories(executable PUBLIC src)
+add_executable(avrvision ${sources})
+target_compile_options(avrvision PUBLIC -std=gnu17)
+target_include_directories(avrvision PUBLIC src)
