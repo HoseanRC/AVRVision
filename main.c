@@ -66,21 +66,11 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         break;
     case ARGP_KEY_END:
         bool config_exists = false;
-        if (!arguments->skip_config)
-        {
-            if (arguments->dir != NULL)
-            {
-                char *config_path;
-                config_path = malloc(strlen(arguments->dir) + sizeof("/" PROJECT_DIR "/" CONFIG_FILE));
-                strcpy(config_path, arguments->dir);
-                strcat(config_path, "/" PROJECT_DIR "/" CONFIG_FILE);
-                config_exists = access(config_path, F_OK) == 0;
-            }
-            else if (access("./" PROJECT_DIR "/" CONFIG_FILE, F_OK) == 0)
-                config_exists = true;
-        }
         chdir(arguments->dir);
-        if(config_exists){
+        if (!arguments->skip_config && access("./" PROJECT_DIR "/" CONFIG_FILE, F_OK) == 0)
+            config_exists = true;
+        if (config_exists)
+        {
             char *pwd = getcwd(NULL, 0);
             printf("config file found.\nusing config file at: %s" PATH_SLASH PROJECT_DIR PATH_SLASH CONFIG_FILE "\n", pwd);
             free(pwd);
