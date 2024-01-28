@@ -60,7 +60,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         arguments->frequency = strtol(arg, &end, 10);
         if (*end)
         {
-            argp_failure(state, 1, 0, "frequency have to be a number." CHECK_HELP);
+            argp_failure(state, 1, 0, "frequency must to be a number." CHECK_HELP);
             exit(ARGP_ERR_UNKNOWN);
         }
         break;
@@ -77,7 +77,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         }
         if (!config_exists && (arguments->frequency == NULL || arguments->target == NULL)) // TODO: fix frequency for chips that dont have frequency setting
         {
-            argp_failure(state, 1, 0, "required frequency and target." CHECK_HELP);
+            argp_failure(state, 1, 0, "frequency and target are required." CHECK_HELP);
             exit(ARGP_ERR_UNKNOWN);
         }
     case ARGP_KEY_ARG:
